@@ -1,6 +1,6 @@
 # ccmcp - Claude Code MCP Control Panel
 
-🔧 Interactive MCP server management tool for Claude Desktop
+🔧 Interactive MCP server management tool for Claude Code
 
 ## Features
 
@@ -52,25 +52,27 @@ CI=true npm start
 
 ## How It Works
 
-ccmcp directly manages your Claude Desktop configuration file:
-- **Config Path**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Server Management**: Toggles servers by adding/removing them from `mcpServers`
+ccmcp directly manages your Claude Code configuration file:
+- **Config Path**: `~/.claude.json`
+- **Server Management**: Uses `disabled: true/false` flag to toggle servers
 - **Status Monitoring**: Tests server commands to check availability
 
 ## Configuration File Example
 
-Your Claude Desktop config will look like this:
+Your Claude Code config will look like this:
 
 ```json
 {
   "mcpServers": {
     "markitdown": {
-      "command": "/Users/username/.local/bin/uvx",
-      "args": ["markitdown-mcp"]
+      "command": "uvx",
+      "args": ["markitdown-mcp"],
+      "disabled": false
     },
     "context7": {
-      "command": "npx",
-      "args": ["context7-mcp"]
+      "command": "npx", 
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "disabled": true
     }
   }
 }
@@ -95,7 +97,7 @@ npm run build
 ## Requirements
 
 - Node.js 20.19.4 or later
-- Claude Desktop installed and configured
+- Claude Code installed and configured
 - macOS (current implementation assumes macOS paths)
 
 ## Architecture
