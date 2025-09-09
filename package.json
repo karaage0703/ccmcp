@@ -5,6 +5,15 @@
 	"description": "Claude Code MCP Control Panel - Interactive MCP server management tool",
 	"author": "karaage",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/karaage0703/ccmcp.git"
+	},
+	"bugs": {
+		"url": "https://github.com/karaage0703/ccmcp/issues"
+	},
+	"homepage": "https://github.com/karaage0703/ccmcp#readme",
+	"keywords": ["claude-code", "mcp", "cli", "management", "interactive", "tui"],
 	"exports": {
 		".": "./dist/index.js"
 	},
@@ -27,13 +36,15 @@
 		"start": "tsx ./src/index.ts",
 		"typecheck": "tsc --noEmit"
 	},
+	"dependencies": {
+		"picocolors": "^1.1.1"
+	},
 	"devDependencies": {
 		"@eslint/js": "^9.35.0",
 		"@types/bun": "^1.2.20",
 		"@types/node": "^22.18.1",
 		"eslint": "^9.33.0",
 		"globals": "^16.3.0",
-		"picocolors": "^1.1.1",
 		"tsdown": "^0.14.2",
 		"tsx": "^4.20.5",
 		"typescript": "^5.6.0",
