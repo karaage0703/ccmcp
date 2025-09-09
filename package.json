@@ -1,0 +1,42 @@
+{
+	"name": "ccmcp",
+	"type": "module",
+	"version": "1.0.0",
+	"description": "Claude Code MCP Control Panel - Interactive MCP server management tool",
+	"author": "karaage",
+	"license": "MIT",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"bin": "./dist/index.js",
+	"files": [
+		"dist"
+	],
+	"engines": {
+		"node": ">=20.19.4"
+	},
+	"scripts": {
+		"build": "tsdown",
+		"dev": "bun run ./src/index.ts",
+		"format": "npm run lint -- --fix",
+		"lint": "eslint --cache .",
+		"prepack": "npm run build",
+		"start": "tsx ./src/index.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.35.0",
+		"@types/bun": "^1.2.20",
+		"@types/node": "^22.18.1",
+		"eslint": "^9.33.0",
+		"globals": "^16.3.0",
+		"picocolors": "^1.1.1",
+		"tsdown": "^0.14.2",
+		"tsx": "^4.20.5",
+		"typescript": "^5.6.0",
+		"typescript-eslint": "^8.43.0"
+	}
+}
