@@ -13,8 +13,8 @@ class CCMCPApp {
 			// Show welcome message
 			this.showWelcome()
 
-			// Check if running in CI/non-interactive mode
-			if (process.env.CI === 'true' || !process.stdout.isTTY) {
+			// Check if running in CI/non-interactive mode or if no args provided for non-interactive
+			if (process.env.CI === 'true' || !process.stdout.isTTY || process.argv.includes('--help') || process.argv.includes('-h')) {
 				await this.runNonInteractive()
 				return
 			}
@@ -30,6 +30,13 @@ class CCMCPApp {
 	private showWelcome(): void {
 		stdout.write(pc.bold(pc.blue('\n  🔧 ccmcp - Claude Code MCP Control Panel\n')))
 		stdout.write(pc.gray('  Interactive MCP server management tool\n'))
+		
+		// Debug info for troubleshooting
+		if (process.env.DEBUG) {
+			console.log('Debug: isTTY =', process.stdout.isTTY)
+			console.log('Debug: CI =', process.env.CI)
+			console.log('Debug: argv =', process.argv)
+		}
 	}
 
 	private async runNonInteractive(): Promise<void> {
@@ -154,13 +161,23 @@ class CCMCPApp {
 
 	private async toggleServer(serverName: string): Promise<void> {
 		try {
+			// First get current state to show correct confirmation message
+			const servers = await configManager.listServers()
+			const server = servers.find(s => s.name === serverName)
+			if (!server) {
+				stdout.write(pc.red(`\n  ✗ Server '${serverName}' not found\n`))
+				return
+			}
+			
+			const action = server.enabled ? 'Disable' : 'Enable'
 			const confirmed = await InteractiveTUI.showConfirmation(
-				`Disable server '${serverName}'?`
+				`${action} server '${serverName}'?`
 			)
 			
 			if (confirmed) {
-				await configManager.toggleServer(serverName)
-				stdout.write(pc.green(`\n  ✓ Server '${serverName}' disabled\n`))
+				const result = await configManager.toggleServer(serverName)
+				const newAction = result.newState ? 'enabled' : 'disabled'
+				stdout.write(pc.green(`\n  ✓ Server '${serverName}' ${newAction}\n`))
 			} else {
 				stdout.write(pc.gray('\n  Operation cancelled\n'))
 			}
@@ -174,7 +191,5 @@ class CCMCPApp {
 }
 
 // Run the app
-if (import.meta.url === `file://${process.argv[1]}`) {
-	const app = new CCMCPApp()
-	app.run().catch(console.error)
-}
+const app = new CCMCPApp()
+app.run().catch(console.error)

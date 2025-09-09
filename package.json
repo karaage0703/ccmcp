@@ -1,7 +1,7 @@
 {
 	"name": "ccmcp",
 	"type": "module",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Claude Code MCP Control Panel - Interactive MCP server management tool",
 	"author": "karaage",
 	"license": "MIT",
@@ -20,7 +20,9 @@
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"bin": "./dist/index.js",
+	"bin": {
+		"ccmcp": "./dist/index.js"
+	},
 	"files": [
 		"dist"
 	],

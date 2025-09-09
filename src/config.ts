@@ -1,13 +1,19 @@
 import { readFile, writeFile, access } from 'node:fs/promises'
 import { join } from 'node:path'
 import { homedir } from 'node:os'
-import type { ClaudeDesktopConfig, MCPServer, ConfigManager } from './types.js'
+import type { ClaudeDesktopConfig, MCPServer, ConfigManager, BackupConfig } from './types.js'
 
 export class ClaudeConfigManager implements ConfigManager {
 	private readonly configPath: string
+	private readonly backupPath: string
 
 	constructor() {
 		this.configPath = join(homedir(), '.claude.json')
+		this.backupPath = join(homedir(), '.ccmcp_backup.json')
+	}
+
+	getBackupPath(): string {
+		return this.backupPath
 	}
 
 	async load(): Promise<ClaudeDesktopConfig> {
@@ -45,42 +51,80 @@ export class ClaudeConfigManager implements ConfigManager {
 
 	async listServers(): Promise<MCPServer[]> {
 		const config = await this.load()
+		const backup = await this.loadBackup()
 		const servers: MCPServer[] = []
 		
+		// Add active servers
 		for (const [name, serverConfig] of Object.entries(config.mcpServers)) {
 			servers.push({
 				name,
 				command: serverConfig.command,
 				args: serverConfig.args,
-				enabled: !serverConfig.disabled, // disabled: true means not enabled
+				enabled: true // Active servers are enabled
+			})
+		}
+		
+		// Add disabled servers from backup
+		for (const [name, serverConfig] of Object.entries(backup.disabledServers)) {
+			servers.push({
+				name,
+				command: serverConfig.command,
+				args: serverConfig.args,
+				enabled: false // Backup servers are disabled
 			})
 		}
 		
 		return servers
 	}
 
-	async toggleServer(serverName: string): Promise<void> {
+	async toggleServer(serverName: string): Promise<{ newState: boolean }> {
 		const config = await this.load()
+		const backup = await this.loadBackup()
 		
+		// Check if server is currently active
 		if (config.mcpServers[serverName]) {
-			// Server exists, toggle its disabled state
-			const server = config.mcpServers[serverName]
-			server.disabled = !server.disabled
-		} else {
-			throw new Error(`Server '${serverName}' not found`)
+			// Server is active, disable it (move to backup)
+			backup.disabledServers[serverName] = config.mcpServers[serverName]
+			delete config.mcpServers[serverName]
+			
+			await Promise.all([
+				this.save(config),
+				this.saveBackup(backup)
+			])
+			
+			return { newState: false } // Now disabled
 		}
 		
-		await this.save(config)
+		// Check if server is in backup (disabled)
+		if (backup.disabledServers[serverName]) {
+			// Server is disabled, enable it (move back to active)
+			config.mcpServers[serverName] = backup.disabledServers[serverName]
+			delete backup.disabledServers[serverName]
+			
+			await Promise.all([
+				this.save(config),
+				this.saveBackup(backup)
+			])
+			
+			return { newState: true } // Now enabled
+		}
+		
+		throw new Error(`Server '${serverName}' not found`)
 	}
 
 	async enableServer(serverName: string): Promise<void> {
-		const config = await this.load()
+		const backup = await this.loadBackup()
 		
-		if (config.mcpServers[serverName]) {
-			config.mcpServers[serverName].disabled = false
-			await this.save(config)
+		if (backup.disabledServers[serverName]) {
+			// Server is disabled, enable it
+			await this.toggleServer(serverName)
 		} else {
-			throw new Error(`Server '${serverName}' not found`)
+			// Server might already be enabled or not found
+			const config = await this.load()
+			if (!config.mcpServers[serverName]) {
+				throw new Error(`Server '${serverName}' not found`)
+			}
+			// Already enabled, do nothing
 		}
 	}
 
@@ -99,11 +143,31 @@ export class ClaudeConfigManager implements ConfigManager {
 		const config = await this.load()
 		
 		if (config.mcpServers[serverName]) {
-			config.mcpServers[serverName].disabled = true
-			await this.save(config)
+			// Server is active, disable it
+			await this.toggleServer(serverName)
 		} else {
-			throw new Error(`Server '${serverName}' not found`)
+			// Server might already be disabled or not found
+			const backup = await this.loadBackup()
+			if (!backup.disabledServers[serverName]) {
+				throw new Error(`Server '${serverName}' not found`)
+			}
+			// Already disabled, do nothing
 		}
+	}
+
+	async loadBackup(): Promise<BackupConfig> {
+		try {
+			await access(this.backupPath)
+			const content = await readFile(this.backupPath, 'utf-8')
+			return JSON.parse(content)
+		} catch {
+			return { disabledServers: {} }
+		}
+	}
+
+	async saveBackup(config: BackupConfig): Promise<void> {
+		const content = JSON.stringify(config, null, 2)
+		await writeFile(this.backupPath, content, 'utf-8')
 	}
 }
 
