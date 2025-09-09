@@ -12,8 +12,31 @@
 
 ## Installation
 
+### Option 1: Using npx (Recommended)
+
 ```bash
-# Clone or download the ccmcp project
+# Run directly without installation
+npx ccmcp@latest
+
+# Or run specific version
+npx ccmcp@1.1.0
+```
+
+### Option 2: Global Installation
+
+```bash
+# Install globally from npm
+npm install -g ccmcp
+
+# Then run anywhere
+ccmcp
+```
+
+### Option 3: Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/karaage0703/ccmcp.git
 cd ccmcp
 npm install
 npm run build
@@ -21,7 +44,7 @@ npm run build
 # Run directly
 npm start
 
-# Or install globally (after build)
+# Or install globally from local build
 npm install -g .
 ccmcp
 ```
@@ -33,6 +56,13 @@ ccmcp
 Simply run `ccmcp` to start the interactive interface:
 
 ```bash
+# Using npx
+npx ccmcp@latest
+
+# Or if installed globally
+ccmcp
+
+# Or from development setup
 npm start
 ```
 
@@ -46,33 +76,58 @@ npm start
 Perfect for CI/scripts or non-TTY environments:
 
 ```bash
+# Using npx
+CI=true npx ccmcp@latest
+
+# Or if installed globally
+CI=true ccmcp
+
+# Or from development setup
 CI=true npm start
-# Shows list of all configured servers
 ```
+
+Shows list of all configured servers without interactive interface.
 
 ## How It Works
 
-ccmcp directly manages your Claude Code configuration file:
-- **Config Path**: `~/.claude.json`
-- **Server Management**: Uses `disabled: true/false` flag to toggle servers
+ccmcp manages your Claude Code MCP servers using a safe backup system:
+
+- **Config Path**: `~/.claude.json` (main Claude Code configuration)
+- **Backup Path**: `~/.ccmcp_backup.json` (disabled servers storage)
+- **Server Management**: Moves servers between active and backup files
 - **Status Monitoring**: Tests server commands to check availability
 
-## Configuration File Example
+### Server States
 
-Your Claude Code config will look like this:
+- **Enabled**: Server exists in `~/.claude.json` and is active
+- **Disabled**: Server is moved to `~/.ccmcp_backup.json` and hidden from Claude Code
 
+This approach ensures:
+- ✅ Claude Code correctly recognizes disabled servers as unavailable
+- ✅ Server configurations are safely preserved for restoration
+- ✅ No interference with Claude Code's configuration format
+
+## Configuration Files
+
+### Active servers (`~/.claude.json`)
 ```json
 {
   "mcpServers": {
-    "markitdown": {
-      "command": "uvx",
-      "args": ["markitdown-mcp"],
-      "disabled": false
-    },
     "context7": {
       "command": "npx", 
-      "args": ["-y", "@upstash/context7-mcp@latest"],
-      "disabled": true
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    }
+  }
+}
+```
+
+### Disabled servers (`~/.ccmcp_backup.json`)
+```json
+{
+  "disabledServers": {
+    "markitdown": {
+      "command": "uvx",
+      "args": ["markitdown-mcp"]
     }
   }
 }
