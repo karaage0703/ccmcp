@@ -1,7 +1,7 @@
 {
 	"name": "ccmcp",
 	"type": "module",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "Claude Code MCP Control Panel - Interactive MCP server management tool",
 	"author": "karaage",
 	"license": "MIT",
@@ -13,7 +13,14 @@
 		"url": "https://github.com/karaage0703/ccmcp/issues"
 	},
 	"homepage": "https://github.com/karaage0703/ccmcp#readme",
-	"keywords": ["claude-code", "mcp", "cli", "management", "interactive", "tui"],
+	"keywords": [
+		"claude-code",
+		"mcp",
+		"cli",
+		"management",
+		"interactive",
+		"tui"
+	],
 	"exports": {
 		".": "./dist/index.js"
 	},
