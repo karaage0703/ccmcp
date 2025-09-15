@@ -8,6 +8,7 @@
 - **🔄 Toggle servers** - Enable/disable MCP servers with simple keystrokes
 - **📊 Status monitoring** - Check if MCP servers are running
 - **🎮 Interactive interface** - Navigate with arrow keys, toggle with space
+- **📤 Export to mmcp** - Export Claude Code settings to mmcp for cross-CLI management
 - **🚀 Fast and lightweight** - Built with TypeScript for speed
 
 ## Installation
@@ -50,6 +51,27 @@ ccmcp
 ```
 
 ## Usage
+
+### mmcp Integration
+
+Export your Claude Code MCP servers to [mmcp](https://www.npmjs.com/package/mmcp) for cross-CLI management:
+
+```bash
+# 1. Install mmcp first (if not already installed)
+npm install -g mmcp
+
+# 2. Export Claude Code settings to mmcp format
+ccmcp export-to-mmcp
+
+# 3. Add target CLI agents (e.g., Codex CLI)
+mmcp agents add codex-cli
+
+# 4. Apply settings to target CLIs
+mmcp apply
+```
+
+**What is mmcp?**
+[mmcp](https://github.com/kou-pg-0131/mmcp) is a CLI tool that centrally manages MCP server configurations across multiple AI agents (Claude Code, Codex CLI, Cursor, Gemini CLI, etc.).
 
 ### Interactive Mode (Default)
 

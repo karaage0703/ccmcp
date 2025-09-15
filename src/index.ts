@@ -4,12 +4,18 @@ import { configManager } from './config.js'
 import { InteractiveTUI, displayServerList, type TUIItem } from './tui.js'
 import { MCPServerMonitor } from './monitor.js'
 import type { MCPServer } from './types.js'
+import { handleCliArgs } from './cli.js'
 
 class CCMCPApp {
 	private monitor = new MCPServerMonitor()
 
 	async run(): Promise<void> {
 		try {
+			// Handle CLI arguments first
+			if (await handleCliArgs()) {
+				return
+			}
+
 			// Show welcome message
 			this.showWelcome()
 
