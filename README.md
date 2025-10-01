@@ -1,5 +1,7 @@
 # ccmcp - Claude Code MCP Control Panel
 
+[日本語版 README](./README_ja.md)
+
 🔧 Interactive MCP server management tool for Claude Code
 
 ## Features
